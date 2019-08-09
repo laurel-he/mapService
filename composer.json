@@ -1,0 +1,50 @@
+{
+    "name": "jiapin/yii2-template",
+    "type": "project",
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
+        },
+        "jiapinai": {
+            "type": "composer",
+            "url": "https://packagist.jiapinai.com"
+        }
+
+    },
+    "config":{
+        "github-oauth": {
+            "github.com": "1dcf78014aaf5c765580fd63670271520a9a7b99"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.1.0",
+        "ext-mongodb": ">=1.5.0",
+        "mongodb/mongodb": "=1.4.2",
+
+        "yidas/yii2-composer-bower-skip": "^2.0.13",
+        "yiisoft/yii2": "2.0.15",
+        "yiisoft/yii2-mongodb": "2.1.7",
+
+        "codeception/base": "2.4.4",
+        "codeception/verify": "0.3.3",
+        "codeception/specify": "0.4.6",
+        "codeception/aspect-mock": "3.0.0",
+
+        "flow/jsonpath": "0.4.0",
+        "devster/ubench": "2.0.0",
+        "qiniu/php-sdk": "7.2.3",
+        "phpunit/phpunit": "7.1.5",
+        "guzzlehttp/guzzle": "6.3.3",
+
+        "jp-libs/jp-logs" :"master-dev",
+        "jp-libs/jp-helpers" :"master-dev",
+        "jp-libs/jiapinapisdk" :"master-dev",
+        "jp-libs/jp-exceptions" :"master-dev",
+        "jp-libs/jp-mongodb" :"master-dev",
+        "jp-libs/jp-yii" :"master-dev",
+        "jp-libs/jp-filters" :"master-dev",
+        "jp-libs/jp-qiniu-helpers" :"master-dev"
+    }
+}

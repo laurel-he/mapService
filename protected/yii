@@ -1,0 +1,18 @@
+#!/usr/bin/env php
+<?php
+
+// defined('YII_DEBUG') or define('YII_DEBUG', true);
+require  __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
+require __DIR__ . '/../protected/config/mode.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+// ???mongodb????ID????????MongoId???
+isset($_SERVER['LOG_ID']) || $_SERVER['LOG_ID'] = strval(new \MongoDB\BSON\ObjectID());
+\kzc\log\LogHelper::init();
+
+$config   = require __DIR__ . '/../protected/config/' . strtolower(APPLICATION_ENV) . '/console.php';
+$app = new yii\console\Application($config);
+$app->controllerNamespace = 'app\\consoles';
+
+$exitCode = $app->run();
+exit($exitCode);
