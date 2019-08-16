@@ -13,16 +13,19 @@ $this->title = '地图搜索';
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <script>
+        window.HOST_TYPE = "2";
+    </script>
     <style type="text/css">
         body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";font-size:14px;}
         #l-map{height:300px;width:100%;}
         #r-result{width:100%;}
     </style>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=9UquRjeMUCT10srAsZqSu7xychTl5PeE"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=9UquRjeMUCT10srAsZqSu7xychTl5PeE"></script>
     <title>关键字输入提示词条</title>
 </head>
 <body>
-<div id="r-result">请输入:<input type="text" id="suggestId" size="20" value="百度" style="width:150px;" /></div>
+<div id="r-result">请输入:<input type="text" id="suggestId" size="40" value="百度" style="width:300px;" /></div>
 <div id="l-map"></div>
 <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
 </body>

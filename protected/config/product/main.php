@@ -11,7 +11,7 @@ $config = \yii\helpers\ArrayHelper::merge(
         'components' => [
             'mongodb' => [
                 'class' => '\yii\mongodb\Connection',
-                'dsn' => "mongodb://cn-office-platform-dev-all.c360in.com.novalocal:27017,cn-office-platform-dev-all.c360in.com.novalocal:28011,cn-office-platform-dev-all.c360in.com.novalocal:28012/bmall?replicaSet=rs0&readPreference=primaryPreferred"
+                'dsn' => "mongodb://notice_service:NoticeService666666!@dds-bp142a55068339041.mongodb.rds.aliyuncs.com:3717,dds-bp142a55068339042.mongodb.rds.aliyuncs.com:3717/notice_service?replicaSet=mgset-11647509"
             ],
         ],
         'params' => [

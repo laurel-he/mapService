@@ -15,8 +15,13 @@ use yii\helpers\Html;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <script>
+        window.HOST_TYPE = "2";
+    </script>
     <?= Html::csrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
+    <?=$this->registerJsFile("@web/static/js/jquery.min.js"); ?>
+    <script src="https://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
     <?php $this->head() ?>
 
     <style>

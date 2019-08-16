@@ -5,7 +5,7 @@ $config = \yii\helpers\ArrayHelper::merge(
         'components' => [
             'mongodb' => [
                 'class' => '\yii\mongodb\Connection',
-                'dsn' => "mongodb://127.0.0.1:27017/products"
+                'dsn' => "mongodb://127.0.0.1:27017/map"
             ],
         ],
         'params'     => [

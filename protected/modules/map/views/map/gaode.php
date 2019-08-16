@@ -2,25 +2,58 @@
 /**
  * @author: hexiaojiao@jiapinai.com
  * @todo:
- * time: 2019-08-09 18:01
+ * time: 2019-08-13 10:20
  */
+
 use yii\helpers\Html;
 use app\modules\map\assets\AppAsset;
 
-//AppAsset::register($this);
 ?>
-<!DOCTYPE>
-<html>
+<!doctype html>
+<html lang="zh-CN">
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>添加点标注工具--高级示例</title>
-    <script>
-        window.HOST_TYPE = "2";
-    </script>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=9UquRjeMUCT10srAsZqSu7xychTl5PeE"></script>
-    <?=$this->registerJsFile("@web/static/js/MarkerTool/MarkerTool.min.js"); ?>
-    <script src="/static/js/MarkerTool/MarkerTool.min.js"></script>
-    <style type="text/css">
+    <!-- 原始地址：//webapi.amap.com/ui/1.0/ui/misc/PoiPicker/examples/index.html -->
+<!--    <base href="https://webapi.amap.com/ui/1.0/ui/misc/PoiPicker/examples/" />-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>输入框选择POI点</title>
+    <style>
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            font-size: 13px;
+        }
+
+        #pickerBox {
+            position: relative;
+            z-index: 9999;
+            right: 30px;
+            width: 300px;
+            left: 0px;
+        }
+
+        #pickerInput {
+            width: 200px;
+            padding: 5px 5px;
+        }
+
+        #poiInfo {
+            background: #fff;
+        }
+
+        .amap_lib_placeSearch .poibox.highlight {
+            background-color: #CAE1FF;
+        }
+
+        .amap_lib_placeSearch .poi-more {
+            display: none!important;
+        }
+
+        /* 百度地图样式 */
         /* 样式选择面板相关css */
         #divStyle {
             width: 280px;
@@ -71,14 +104,24 @@ use app\modules\map\assets\AppAsset;
         }
 
         #r-result{width:100%;}
+        /* 筛选框 */
+        #selectpicker {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
 <div class="head">
-    <div id="r-result">请输入地址：<input type="text" id="suggestId" size="40" value="成都" style="width:300px;" /></div>
+    <div id="r-result">请输入地址：
+        <div id="pickerBox">
+            <input id="pickerInput" class="form-control" placeholder="输入关键字选取地点" />
+            <div id="poiInfo"></div>
+        </div>
+    </div>
     <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
     <br />
-    <input type="button" value="选择标注样式" onclick="openStylePnl()" />&nbsp;&nbsp;&nbsp;
+    <button type="button" class="btn btn-success" onclick="openStylePnl()">选择标注样式</button>
     <div id="divStyle" >
         <ul>
             <li>
@@ -115,70 +158,32 @@ use app\modules\map\assets\AppAsset;
             </li>
         </ul>
     </div>
-    <input type="button" value="关闭" onclick="mkrTool.close()" />
+    <button type="button" class="btn btn-success" onclick="classify()">筛选</button>
+    <select id="selectpicker" class="show-tick btn btn-success" title="请选择一项" data-live-search="true">
+    </select>
+    <br />
     <br />
 </div>
-<div style="width: 100%; height: 500px;border:1px solid gray" id="container"></div>
-</body>
-</html>
+<div style="width: 100%; height: 80%;border:1px solid gray" id="container"></div>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=9UquRjeMUCT10srAsZqSu7xychTl5PeE"></script>
+<?=$this->registerJsFile("@web/static/js/MarkerTool/MarkerTool.min.js"); ?>
+<script src="/static/js/MarkerTool/MarkerTool.min.js"></script>
+<script type="text/javascript" src='https://webapi.amap.com/maps?v=1.4.15&key=2b946d85884b3a5ce4805d82e7aac994'></script>
+<!-- UI组件库 1.0 -->
+<script src="https://webapi.amap.com/ui/1.0/main.js?v=1.0.11"></script>
 <script type="text/javascript">
     var map = new BMap.Map("container");
-    map.centerAndZoom(new BMap.Point(116.404, 39.915), 5);
+    map.centerAndZoom(new BMap.Point(116.404, 39.915), 12);
     map.enableScrollWheelZoom();
-    this.paintMap(map)
-    // 开始：搜索
-    function G(id) {
-        return document.getElementById(id);
-    }
-    var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
-        {"input" : "suggestId"
-            ,"location" : map
-        });
-    ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
-        var str = "";
-        var _value = e.fromitem.value;
-        var value = "";
-        if (e.fromitem.index > -1) {
-            value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
-        }
-        str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+    type = getUrlParam('type')
 
-        value = "";
-        if (e.toitem.index > -1) {
-            _value = e.toitem.value;
-            value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
-        }
-        str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
-        G("searchResultPanel").innerHTML = str;
-    });
-    var myValue;
-    ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
-        var _value = e.item.value;
-        myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
-        G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+    this.paintMap(map, type)
 
-        setPlace();
-    });
-
-    function setPlace(){
-        function myFun(){
-            var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
-            map.centerAndZoom(pp, 18);
-            var marker = new BMap.Marker(pp);
-            // map.addOverlay(marker);    //添加标注
-            marker.enableDragging();
-            map.enableDragging();
-        }
-        var local = new BMap.LocalSearch(map, { //智能搜索
-            onSearchComplete: myFun
-        });
-        local.search(myValue);
-    }
-    // 结束：搜索
-    //向地图中添加比例尺控件
+    /** 百度地图选点相关begin */
+        //向地图中添加比例尺控件
     var ctrlSca = new window.BMap.ScaleControl({
-        anchor: BMAP_ANCHOR_BOTTOM_LEFT
-    });
+            anchor: BMAP_ANCHOR_BOTTOM_LEFT
+        });
 
     //拼接infowindow内容字串
     var html = [];
@@ -187,17 +192,17 @@ use app\modules\map\assets\AppAsset;
     html.push('  <tr>');
     html.push('      <td align="left" class="common">名 称：</td>');
     html.push('      <td colspan="2"><input type="text" maxlength="50" size="18"  id="txtName"></td>');
-    html.push('	     <td valign="top"><span class="star">*</span></td>');
+    html.push('	     <td valign="top"><span class="star"></span></td>');
     html.push('  </tr>');
     html.push('  <tr>');
     html.push('      <td  align="left" class="common">电 话：</td>');
     html.push('      <td colspan="2"><input type="text" maxlength="30" size="18"  id="txtTel"></td>');
-    html.push('	     <td valign="top"><span class="star">*</span></td>');
+    html.push('	     <td valign="top"><span class="star"></span></td>');
     html.push('  </tr>');
     html.push('  <tr>');
     html.push('      <td  align="left" class="common">地 址：</td>');
     html.push('      <td  colspan="2"><input type="text" maxlength="50" size="18"  id="txtAddr"></td>');
-    html.push('	     <td valign="top"><span class="star">*</span></td>');
+    html.push('	     <td valign="top"><span class="star"></span></td>');
     html.push('  </tr>');
     html.push('  <tr>');
     html.push('      <td align="left" class="common">描 述：</td>');
@@ -214,27 +219,167 @@ use app\modules\map\assets\AppAsset;
 
     var infoWin = new BMap.InfoWindow(html.join(""), {offset: new BMap.Size(0, -10)});
     var curMkr = null; // 记录当前添加的Mkr
-
     var mkrTool = new BMapLib.MarkerTool(map, {autoClose: true});
     mkrTool.addEventListener("markend", function(evt){
         var mkr = evt.marker;
         mkr.openInfoWindow(infoWin);
         curMkr = mkr;
     });
-    console.log('document.getElementsByClassName(\'BMapLabel\').valueOf()', document.getElementsByClassName('BMapLabel').length)
 
+    /** 百度地图选点相关end */
+    AMapUI.loadUI(['misc/PoiPicker'], function(PoiPicker) {
+
+        var poiPicker = new PoiPicker({
+            //city:'北京',
+            input: 'pickerInput'
+        });
+
+        //初始化poiPicker
+        poiPickerReady(poiPicker);
+    });
+
+    //获取url中的参数
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+        if (r != null) return unescape(r[2]); return null; //返回参数值
+    }
+    /** 分类筛选 */
+    function classify() {
+        $.ajax({
+            url : "status",
+            type : 'post',
+            data : {},
+            dataType : 'json',
+            async : false,
+            success : function(data){
+                $("#selectpicker").css("display","inline");
+                $("#selectpicker").empty();
+                let res = data.data.result;
+                //添加子元素
+                $("#selectpicker").append("<option>---请选择---</option><option value='all'>全部</option>");
+                $.each(res, function (index, value) {
+                    $("#selectpicker").append("<option value='" + value['icon'] + "'> <span><img src=\"http://api.map.baidu.com/library/MarkerTool/1.2/examples/images/transparent.gif\" style=\"width:19px;height:25px;background-position: -125px  -67px \" />" + value['chinese'] + "</span></option>");
+                });
+                console.log('data:', data.data.result)
+            },
+            error : function(){
+                console.log('error:', error)
+            }
+        });
+    }
+    /**  筛选特定的点的地图 */
+    $("select#selectpicker").change(function(){
+        if ( $(this).val() === 'all') {
+            window.location.href='gaode';
+        } else {
+            window.location.href='gaode?type=' + $(this).val();
+        }
+        // location.href();
+    });
+    function poiPickerReady(poiPicker) {
+
+        window.poiPicker = poiPicker;
+
+        var marker = new AMap.Marker();
+        var infoWindow = new AMap.InfoWindow({
+            offset: new AMap.Pixel(0, -20)
+        });
+
+        //选取了某个POI
+        poiPicker.on('poiPicked', function(poiResult) {
+
+            var source = poiResult.source,
+                poi = poiResult.item,
+                info = {
+                    source: source,
+                    id: poi.id,
+                    name: poi.name,
+                    location: poi.location.toString(),
+                    address: poi.address
+                };
+            setLocation(poi.location);
+        });
+    }
+
+    // 用经纬度设置地图中心点
+    function setLocation(location){
+        if(location.lng != "" && location.lat != ""){
+            var new_point = new BMap.Point(location.lng, location.lat);
+            map.centerAndZoom(new BMap.Point(location.lng, location.lat), 16);
+            var marker = new BMap.Marker(new_point);  // 创建标注
+            // console.log('marker:', marker)
+            // map.openInfoWindow(infoWin);
+            // curMkr = map;
+            // map.addOverlay(marker);              // 将标注添加到地图中
+            // map.panTo(new_point);
+            var curMkr = null; // 记录当前添加的Mkr
+            var mkrTool = new BMapLib.MarkerTool(map, {autoClose: true});
+            mkrTool.addEventListener("markend", function(evt){
+                var mkr = evt.marker;
+                mkr.openInfoWindow(infoWin);
+                curMkr = mkr;
+            });
+        }
+    }
     //打开样式面板
     function openStylePnl(){
         document.getElementById("divStyle").style.display = "block";
     }
-    let type = 0;
+
     //选择样式
+    selectType = 0; // 0:正常选择样式，1:修改样式
+    selectNameType = 0; // 0:按照名字修改 1：按照id修改
+    selectOption = ''
     function selectStyle(index){
-        mkrTool.open(); //打开工具
-        this.type = index;
-        var icon = BMapLib.MarkerTool.SYS_ICONS[index]; //设置工具样式，使用系统提供的样式BMapLib.MarkerTool.SYS_ICONS[0] -- BMapLib.MarkerTool.SYS_ICONS[23]
-        mkrTool.setIcon(icon);
-        document.getElementById("divStyle").style.display = "none";
+        if (selectType === 0) {
+            mkrTool.open(); //打开工具
+            this.type = index;
+            var icon = BMapLib.MarkerTool.SYS_ICONS[index]; //设置工具样式，使用系统提供的样式BMapLib.MarkerTool.SYS_ICONS[0] -- BMapLib.MarkerTool.SYS_ICONS[23]
+            mkrTool.setIcon(icon);
+            $("#divStyle").css("display","none");
+        } else {
+            changeStyle(index)
+            $("#divStyle").css("display","none");
+            this.selectType = 0;
+        }
+    }
+
+    /** 未刷新时根据名称修改logo */
+    function changeStyle(index) {
+        if (this.selectNameType === 0) {
+            // 通过name修改type
+            $.ajax({
+                url : "logo",
+                type : 'post',
+                data : {"name": selectOption, 'type': index},
+                dataType : 'json',
+                async : false,
+                success : function(data){
+                    alert("修改成功！")
+                    location.reload();
+                },
+                error : function(){
+                    console.log('修改失败');
+                }
+            });
+        } else {
+            // 通过id修改type
+            $.ajax({
+                url : "logo",
+                type : 'post',
+                data : {"id": selectOption, 'type': index},
+                dataType : 'json',
+                async : false,
+                success : function(data){
+                    alert("修改成功！")
+                    location.reload();
+                },
+                error : function(){
+                    console.log('修改失败');
+                }
+            });
+        }
     }
 
     //提交数据
@@ -244,17 +389,17 @@ use app\modules\map\assets\AppAsset;
         var addr = $("#txtAddr").val();
         var desc = $("#areaDesc").val();
 
-        if(!name || !tel || !addr){
-            alert("星号字段必须填写");
-            return;
-        }
+        // if(!name || !tel || !addr){
+        //     alert("星号字段必须填写");
+        //     return;
+        // }
 
         if(curMkr){
             //设置label
             var lbl = new BMap.Label(name, {offset: new BMap.Size(20, -10)});
             lbl.setStyle({border: "solid 1px gray"});
             curMkr.setLabel(lbl);
-            let info = new window.BMap.InfoWindow("<p style=’font-size:12px;lineheight:1.8em;’>" + name + "</br>电话：" + tel + "</br> 地址：" + addr + "</br> 描述：" + desc + "</br></p>"); // 创建信息窗口对象
+            let info = new window.BMap.InfoWindow("<p style=’font-size:12px;lineheight:1.8em;’>" + name + "</br>电话：" + tel + "</br> 地址：" + addr + "</br> 描述：" + desc + "</br><button onclick='nameDel(" + '"' + name + '"' + ")'>删除</button><br> <button onclick='changeLogo(" + '"' + name + '"' + ", 0)'>修改图标</button><br /></p>"); // 创建信息窗口对象
             // this.openInfoWindow(info);
 
             curMkr.addEventListener("click", function () {
@@ -271,9 +416,6 @@ use app\modules\map\assets\AppAsset;
         if(infoWin.isOpen()){
             map.closeInfoWindow();
         }
-        console.log('type of lbl', typeof lbl.map);
-        console.log('lbl:', lbl.map)
-        console.log('lbl:', JSON.stringify(lbl.map.Oe))
 
         //将数据提交到后台数据库中
         $.ajax({
@@ -291,45 +433,73 @@ use app\modules\map\assets\AppAsset;
             }
         });
 
-        console.log('title:', title)
-        console.log('document.getElementsByClassName(\'BMapLabel\').valueOf()', $(".BMapLabel").length)
     }
 
-    function showMessage() {
-    }
-    //输入校验
-    function encodeHTML(a){
-        return a.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    /** 根据名称删除点位，适用于刚提交但未刷新，所以没有id的点位 */
+    function nameDel(name) {
+        console.log('nameDel:', name)
+        //将数据提交到后台数据库中
+        $.ajax({
+            url : "delete",
+            type : 'post',
+            data : {"name": name},
+            dataType : 'json',
+            async : false,
+            success : function(data){
+                console.log('data:', data)
+                alert("删除成功")
+                location.reload();
+            },
+            error : function(){
+                console.log('删除失败');
+            }
+        });
     }
 
-    //展示数据
-    function showInfo(thisMarker,point) {
-        //获取点的信息
-        var sContent =
-            '<ul style="margin:0 0 5px 0;padding:0.2em 0">'
-            +'<li style="line-height: 26px;font-size: 15px;">'
-            +'<span style="width: 50px;display: inline-block;">id：</span>' + point.name + '</li>'
-            +'<li style="line-height: 26px;font-size: 15px;">'
-            +'<span style="width: 50px;display: inline-block;">名称：</span>' + point.tel + '</li>'
-            +'<li style="line-height: 26px;font-size: 15px;"><span style="width: 50px;display: inline-block;">查看：</span><a href="'+point.addr+'">详情</a></li>'
-            +'</ul>';
-        var infoWindow = new BMap.InfoWindow(sContent); //创建信息窗口对象
-        thisMarker.openInfoWindow(infoWindow); //图片加载完后重绘infoWindow
+    /** 修改logo */
+    function changeLogo(name, type = 1) {
+        this.selectType = 1;
+        this.selectNameType = type;
+        this.selectOption = name
+        openStylePnl()
+        if (type === 0) {
+            console.log('changeLogoByName:', name)
+        } else {
+            console.log('name:', name)
+        }
     }
-    //重填数据
-    function fnClear(){
-        document.getElementById("txtName").value = "";
-        document.getElementById("txtTel").value = "";
-        document.getElementById("txtAddr").value = "";
-        document.getElementById("areaDesc").value = "";
+
+    /** 删除点位 */
+    function del(_id) {
+        //将数据提交到后台数据库中
+        $.ajax({
+            url : "delete",
+            type : 'post',
+            data : {"id": _id},
+            dataType : 'json',
+            async : false,
+            success : function(data){
+                console.log('data:', data)
+                alert("删除成功")
+                location.reload();
+            },
+            error : function(){
+                console.log('删除失败');
+            }
+        });
     }
-    // 进入页面绘制已存在点
-    function paintMap(map) {
+
+    /** 进入页面时绘制已存在点 */
+    function paintMap(map, type) {
+        let data = {}
+        if (type) {
+            data = {'type': type}
+        }
         // 读取已存在数据
         $.ajax({
             url : "point",
             type : 'post',
-            data : {},
+            data : data,
             dataType : 'json',
             async : false,
             success : function(data){
@@ -337,12 +507,10 @@ use app\modules\map\assets\AppAsset;
                 {
                     let res = data.data.data;
                     $.each(res, function (index, value) {
-                        console.log('index:', index)
-                        console.log('value:', value)
                         let mapPoint = JSON.parse(value['point'])
                         console.log('point:', JSON.parse(value['point'])['lat'])
                         var point = new BMap.Point(mapPoint['lng'],mapPoint['lat']);
-                        map.centerAndZoom(point, 12);
+                        map.centerAndZoom(point, 6);
                         var myIcon = BMapLib.MarkerTool.SYS_ICONS[value['type']];
                         var marker = new BMap.Marker(point, {icon: myIcon});  // 创建标注
                         map.addOverlay(marker);              // 将标注添加到地图中
@@ -350,20 +518,32 @@ use app\modules\map\assets\AppAsset;
                         var label = new BMap.Label(value['name'],{offset:new BMap.Size(20,-10)});
                         marker.setLabel(label);
                         map.addOverlay(marker);              // 将标注添加到地图中
-                        let infos = new window.BMap.InfoWindow("<p style=’font-size:12px;lineheight:1.8em;’>" + value['name'] + "</br>电话：" + value['tel'] + "</br> 地址：" + value['addr'] + "</br> 描述：" + value['desc'] + "</br></p>"); // 创建信息窗口对象
+                        let infos = new window.BMap.InfoWindow("<p style=’font-size:12px;lineheight:1.8em;’>" + value['name'] + "</br>电话：" + value['tel'] + "</br> 地址：" + value['addr'] + "</br> 描述：" + value['desc'] + "</br><button onclick='del(" + '"' + value['_id'] + '"' + ")'>删除</button><br /><button onclick='changeLogo(" + '"' + value['_id'] + '"' + ")'>修改图标</button><br /></p>"); // 创建信息窗口对象
                         // this.openInfoWindow(info);
 
                         marker.addEventListener("click", function () {
-                            console.log('click1111');
                             this.openInfoWindow(infos);
                         });
                     })
                 }
             },
             error : function(){
-                console.log('保存失败');
+                alert('保存失败')
             }
         });
     }
-</script>
+    jumpName = getUrlParam('name')
 
+    /** 如果有jumpName就代表是从集团管理跳转过来的 */
+    if (jumpName) {
+        let desc = getUrlParam('desc');
+        let name = jumpName;
+        let address = getUrlParam('address');
+        let mobile = getUrlParam('mobile');
+        $('#pickerInput').val(address)
+        selectStyle(0)
+    }
+</script>
+</body>
+
+</html>
